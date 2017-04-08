@@ -4,15 +4,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.graphics.Typeface;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -29,31 +28,32 @@ public class MenuActivity extends AppCompatActivity {
     private SQLiteDatabase sqLiteDatabase;
     private String titleString, firstString, secondString, thirdString, detailString,
             latString, lngString, iconString;
-    private  String ttid;
-            private String tname,taddress;
+    private String ttid;
+    private String tname, taddress;
 
-     String tpicture;
+    String tpicture;
     TextView txttname;
     ImageView imglogo;
     ListView listviewmenu;
+
+    private String idString;    // id ==> tid on tbt_turist
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-        /*
-         gotomenu.putExtra("ttid",tid);
-                gotomenu.putExtra("tname",tname);
-                 gotomenu.putExtra("tpicture",tpicture);
-        */
+
+        //Get ID from Intent
+        getIDFromIntent();
+
 
         tname = getIntent().getStringExtra("tname");
-        txttname = (TextView)findViewById(R.id.txttname);
+        txttname = (TextView) findViewById(R.id.txttname);
         txttname.setText(tname);
-        imglogo  = (ImageView)findViewById(R.id.imglogo);
+        imglogo = (ImageView) findViewById(R.id.imglogo);
         tpicture = getIntent().getStringExtra("tpicture");
-        TextView txtaddress = (TextView)findViewById(R.id.txtaddress);
+        TextView txtaddress = (TextView) findViewById(R.id.txtaddress);
         taddress = getIntent().getStringExtra("taddress");
         txtaddress.setText(taddress);
 
@@ -78,14 +78,40 @@ public class MenuActivity extends AppCompatActivity {
             imglogo.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
-        listviewmenu = (ListView)findViewById(R.id.listviewmenu);
+        listviewmenu = (ListView) findViewById(R.id.listviewmenu);
 
 //Request SQLite
         mySQLite = new MySQLite(this);
-     synAndDelete();
+        synAndDelete();
 
-setlistmenu();
+        setlistmenu();
 
+
+    }
+
+    private void getIDFromIntent() {
+        idString = getIntent().getStringExtra("ttid");
+        Log.d("8AprilV1", "idString ==> " + idString);
+
+        try {
+
+            GetShopWhereID getShopWhereID = new GetShopWhereID(MenuActivity.this);
+            getShopWhereID.execute(idString);
+
+            String strJSON = getShopWhereID.get();
+            Log.d("8AprilV1", "JSON ==> " + strJSON);
+
+            JSONArray jsonArray = new JSONArray(strJSON);
+            JSONObject jsonObject = jsonArray.getJSONObject(0);
+            latString = jsonObject.getString("tlatitude");
+            lngString = jsonObject.getString("tlongtitude");
+            Log.d("8AprilV1", "lat ==> " + latString);
+            Log.d("8AprilV1", "lng ==> " + lngString);
+
+
+        } catch (Exception e) {
+            Log.d("8AprilV1", "e getID ==> " + e.toString());
+        }
 
     }
 
@@ -102,7 +128,7 @@ setlistmenu();
     private void setlistmenu() {
 
         ttid = getIntent().getStringExtra("ttid");
-        Toast.makeText(getApplication(),ttid.toString(),Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplication(), ttid.toString(), Toast.LENGTH_LONG).show();
         final SQLiteDatabase sqLiteDatabase = openOrCreateDatabase(MyOpenHelper.database_name,
                 MODE_PRIVATE, null);
         final Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM tbt_menu WHERE tid  = " + "'" +
@@ -118,9 +144,9 @@ setlistmenu();
         final String[] mpicture = new String[count];
 
 
-        for (int i = 0; i < count;) {
+        for (int i = 0; i < count; ) {
             tid[i] = cursor.getString(cursor.getColumnIndex(MySQLite.column_ttid));
-            Toast.makeText(getApplication(),tid[i].toString(),Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplication(), tid[i].toString(), Toast.LENGTH_LONG).show();
 
             mname[i] = cursor.getString(cursor.getColumnIndex(MySQLite.column_mname));
             mdetail[i] = cursor.getString(cursor.getColumnIndex(MySQLite.column_mdetail));
@@ -139,9 +165,9 @@ setlistmenu();
     }
 
     private void synAndDelete() {
-      SQLiteDatabase sqLiteDatabase = openOrCreateDatabase(MyOpenHelper.database_name,
+        SQLiteDatabase sqLiteDatabase = openOrCreateDatabase(MyOpenHelper.database_name,
                 MODE_PRIVATE, null);
-       // sqLiteDatabase.delete(MySQLite.menu_mtable, null, null);
+        // sqLiteDatabase.delete(MySQLite.menu_mtable, null, null);
 
         SynJSON mySynJSON = new SynJSON();
         mySynJSON.execute();
@@ -153,12 +179,11 @@ setlistmenu();
         @Override
         protected String doInBackground(Void... voids) {
             try {
-               //String strURL = "http://www.zaabkalasin.com/turist/php_get_menu.php";
-                String strURL = "http://10.0.2.2/turist/php_get_menu.php";
+                String strURL = "http://www.zaabkalasin.com/turist/php_get_menu.php";
+                //String strURL = "http://10.0.2.2/turist/php_get_menu.php";
 
                 OkHttpClient okHttpClient = new OkHttpClient();
                 Request.Builder builder = new Request.Builder();
-
 
 
                 Request request = builder.url(strURL).build();
@@ -183,7 +208,6 @@ setlistmenu();
                 sqLiteDatabase.delete(MySQLite.menu_mtable, null, null);
 
                 final JSONArray jsonArray = new JSONArray(s);
-
 
 
                 final String[] ttidStrings = new String[jsonArray.length()];
