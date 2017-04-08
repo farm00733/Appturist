@@ -1,15 +1,14 @@
 package com.appturist;
 
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -18,6 +17,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private double latADouble, lngADouble;
     private LatLng centerLatLng;
     private int imageMakerAnInt;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         //Create LatLng
-        createLatLng();
+        //createLatLng();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -54,6 +54,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         latString = getIntent().getStringExtra("tlatitude");
         lngString = getIntent().getStringExtra("tlongtitude");
+        Log.d("8AprilV1", "lat receive ==> " + latString);
+        Log.d("8AprilV1", "lng receive ==> " + lngString);
+
         latADouble = Double.parseDouble(latString);
         lngADouble = Double.parseDouble(lngString);
 
@@ -65,13 +68,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         //Setup Center of Map to LatLng
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerLatLng, 16));
+        LatLng latLng = new LatLng(13.668463, 100.623097);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
 
         //Create Marker
-        mMap.addMarker(new MarkerOptions()
-                .position(centerLatLng)
-                .icon(BitmapDescriptorFactory.fromResource(imageMakerAnInt))
-                .title(titleString));
+//        mMap.addMarker(new MarkerOptions()
+//                .position(centerLatLng)
+//                .icon(BitmapDescriptorFactory.fromResource(imageMakerAnInt))
+//                .title(titleString));
 
     }   // onMapReady
 
